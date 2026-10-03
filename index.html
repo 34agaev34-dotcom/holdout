@@ -444,7 +444,6 @@ body.touch #tKs{width:48px;height:48px;right:calc(222px + env(safe-area-inset-ri
     </div>
     <div class="setSec">
       <div class="lbl">ЗВУКИ</div>
-      <label class="sRow"><span>Голос бойца (реплики по рации)</span><input type="checkbox" id="sVoice"><b></b></label>
       <p class="credits">Реальные записи из открытого набора CDDA-Soundpacks (github.com/Fris0uman/CDDA-Soundpacks), лицензии CC0 и CC BY:<br>
       выстрелы 5,56 мм, заряжание дробовика, перезарядка пистолета и затвора — DoctorBoomstick (CC BY 4.0);
       выстрел винтовки — Mike Koenig, soundbible.com (CC BY 3.0);
@@ -2920,10 +2919,10 @@ function renderBinds(){const box=$('bindList');box.innerHTML='';ACTIONS.forEach(
     const b=document.createElement('button');b.type='button';b.className='bKey'+(capAct===a?' cap':'');b.textContent=capAct===a?'Нажми клавишу…':KL(a);b.onclick=()=>{capAct=capAct===a?null:a;renderBinds();};row.append(sp,b);box.appendChild(row);});}
 addEventListener('keydown',e=>{if(!capAct)return;e.preventDefault();e.stopImmediatePropagation();if(e.code==='Escape'){capAct=null;renderBinds();return;}
   const other=actOf(e.code);if(other&&other!==capAct)binds[other]=binds[capAct];binds[capAct]=e.code;capAct=null;saveSet();renderBinds();renderCtrlHelp();},true);
-function syncSetUI(){$('sSens').value=SET.sens;$('sSensV').textContent=SET.sens.toFixed(2);$('sTsens').value=SET.tsens;$('sTsensV').textContent=SET.tsens.toFixed(2);$('sInv').checked=SET.inv;if($('sVoice'))$('sVoice').checked=SET.voice!==false;
+function syncSetUI(){$('sSens').value=SET.sens;$('sSensV').textContent=SET.sens.toFixed(2);$('sTsens').value=SET.tsens;$('sTsensV').textContent=SET.tsens.toFixed(2);$('sInv').checked=SET.inv;
   $('sBsc').value=SET.bsc;$('sBscV').textContent=Math.round(SET.bsc*100)+'%';$('sBal').value=SET.bal;$('sBalV').textContent=Math.round(SET.bal*100)+'%';}
 [['sSens','sens'],['sTsens','tsens'],['sBsc','bsc'],['sBal','bal']].forEach(([id,k])=>$(id).addEventListener('input',e=>{SET[k]=+e.target.value;saveSet();syncSetUI();applyTouchLayout();}));
-$('sInv').addEventListener('change',e=>{SET.inv=e.target.checked;saveSet();});$('sVoice').addEventListener('change',e=>{SET.voice=e.target.checked;saveSet();});
+$('sInv').addEventListener('change',e=>{SET.inv=e.target.checked;saveSet();});
 $('bindReset').onclick=()=>{binds=Object.assign({},DEFB);saveSet();renderBinds();renderCtrlHelp();};
 let setFrom=null;
 function openSettings(from){setFrom=from;$(from).classList.add('hidden');$('setScr').classList.remove('hidden');capAct=null;renderBinds();syncSetUI();}
@@ -3538,11 +3537,9 @@ let radioT=0,radioHide=0,ruVoice=null;
 function pickVoice(){try{const vs=speechSynthesis.getVoices().filter(v=>/^ru/i.test(v.lang));ruVoice=vs.find(v=>/yuri|maxim|pavel|dmitr|alex|male|муж/i.test(v.name))||vs[0]||null;}catch(e){}}
 if(window.speechSynthesis){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
 sfx.radioClick=()=>{const o=out(.16,0,0,3200);if(!o)return;nse(o,{dur:.035,type:'bandpass',f:1800,q:2,vol:1});nse(o,{t:.04,dur:.14,type:'bandpass',f:2600,q:.8,vol:.22});};
-function hq(line,delay){setTimeout(()=>{if(!playing||P.dead)return;const el=$('radioSub');el.innerHTML=`<b style="color:#8fd0ff">Батя:</b> ${line}`;el.style.opacity=1;clearTimeout(radioHide);radioHide=setTimeout(()=>el.style.opacity=0,3200);radioT=time+3.2;sfx.radioClick();
-  if(SET.voice!==false&&window.speechSynthesis&&ruVoice){try{const u=new SpeechSynthesisUtterance(line.replace(/[—.«»]/g,' '));u.lang='ru-RU';u.voice=ruVoice;u.rate=1.05;u.pitch=.6;u.volume=.85;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}}},delay||0);}
+function hq(line,delay){setTimeout(()=>{if(!playing||P.dead)return;const el=$('radioSub');el.innerHTML=`<b style="color:#8fd0ff">Батя:</b> ${line}`;el.style.opacity=1;clearTimeout(radioHide);radioHide=setTimeout(()=>el.style.opacity=0,3200);radioT=time+3.2;sfx.radioClick();},delay||0);}
 function radio(key,prob){if(!playing||time<radioT||Math.random()>(prob??1))return;const arr=RADIO[key];if(!arr)return;const line=arr[Math.floor(Math.random()*arr.length)];radioT=time+2.3;
-  const el=$('radioSub');el.innerHTML=`<b>Беркут:</b> ${line}`;el.style.opacity=1;clearTimeout(radioHide);radioHide=setTimeout(()=>el.style.opacity=0,2300);sfx.radioClick();
-  if(SET.voice!==false&&window.speechSynthesis&&ruVoice){try{const u=new SpeechSynthesisUtterance(line.replace(/[—.]/g,' '));u.lang='ru-RU';u.voice=ruVoice;u.rate=1.15;u.pitch=.82;u.volume=.85;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}}}
+  const el=$('radioSub');el.innerHTML=`<b>Беркут:</b> ${line}`;el.style.opacity=1;clearTimeout(radioHide);radioHide=setTimeout(()=>el.style.opacity=0,2300);sfx.radioClick();}
 /* ================= Knife finishers ================= */
 let FIN=null;
 sfx.stab=()=>{const o=out(.7,0,.15);if(!o)return;nse(o,{dur:.06,type:'bandpass',f:2400,q:1.5,vol:1});metal(o,0,[1800,3100,4700],.35,.12);osc(o,{f:95,f2:50,dur:.12,vol:.8});
